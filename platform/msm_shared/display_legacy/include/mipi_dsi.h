@@ -82,6 +82,8 @@
 #define DTYPE_GEN_LWRITE 0x29	/* 4th Byte is 0xc0 */
 #define DTYPE_DCS_WRITE1 0x15	/* 4th Byte is 0x80 */
 
+#define PHY_TIMEOUT 10000 /* PHY ready timeout (uS) */
+
 //BEGINNING OF Tochiba Config- video mode
 
 static const unsigned char toshiba_panel_mcap_off[8] = {

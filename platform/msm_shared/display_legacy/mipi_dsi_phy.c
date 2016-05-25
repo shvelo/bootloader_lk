@@ -74,7 +74,7 @@ static void mipi_dsi_calibration(void)
 int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
 {
 	struct mipi_dsi_phy_ctrl *pd;
-	uint32_t i, off = 0;
+	uint32_t i, off = 0, phy_timeout_counter = 0;
 	int mdp_rev;
 
 	mdp_rev = mdp_get_revision();
@@ -169,8 +169,13 @@ int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
 		writel((pd->pll[0] | 0x01), MIPI_DSI_BASE + 0x200);
 
 		/* Check that PHY is ready */
-		while (!(readl(DSIPHY_PLL_RDY) & 0x01))
+		while (!(readl(DSIPHY_PLL_RDY) & 0x01) && phy_timeout_counter++ <= PHY_TIMEOUT)
 			udelay(1);
+
+		if(phy_timeout_counter >= PHY_TIMEOUT) {
+			dprintf(CRITICAL, "MIPI_DSI: PHY ready timeout after %d uSeconds\n", phy_timeout_counter);
+			return 1;
+		}
 
 		writel(0x202D, DSI_CLKOUT_TIMING_CTRL);
 
