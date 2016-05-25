@@ -387,7 +387,7 @@ void target_display_init(const char *panel_name)
 	case LINUX_MACHTYPE_8627_CDP:
 		panel.clk_func = msm8960_mipi_panel_clock;
 		panel.power_func = lumia52X_panel_power;
-		dprintf(INFO, "8627_CDP not yet implemented");
+		dprintf(INFO, "8627_CDP not yet implemented\n");
 		break;
 	default:
 		return;
@@ -407,4 +407,3 @@ void target_display_shutdown(void)
 		msm_display_off();
 	}
 }
-
