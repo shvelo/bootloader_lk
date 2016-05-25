@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2011, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016, FeherNeoH. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -26,34 +26,7 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef _TARGET_MSM8960_DISPLAY_H
-#define _TARGET_MSM8960_DISPLAY_H
 
-#include <mipi_dsi.h>
+int mipi_race_cmd_on(void);
+int mipi_race_cmd_off(void);
 
-#define MIPI_FB_ADDR  0x89000000
-
-/* Toshiba MDT61 Mipi Panel */
-/* Unique to this panel, display width is 800, image is 600 */
-#define TSH_MDT61_DISPLAY_WIDTH      800
-#define TSH_MDT61_MIPI_FB_WIDTH      (TSH_MDT61_DISPLAY_WIDTH - 200)
-#define TSH_MDT61_MIPI_FB_HEIGHT     1024
-
-#define MIPI_HSYNC_PULSE_WIDTH       8
-#define MIPI_HSYNC_BACK_PORCH_DCLK   16
-#define MIPI_HSYNC_FRONT_PORCH_DCLK  23
-
-#define MIPI_VSYNC_PULSE_WIDTH       2
-#define MIPI_VSYNC_BACK_PORCH_LINES  2
-#define MIPI_VSYNC_FRONT_PORCH_LINES 7
-
-void mipi_chimei_video_wxga_init(struct msm_panel_info *pinfo);
-void lvds_chimei_wxga_init(struct msm_panel_info *pinfo);
-void mipi_toshiba_video_wsvga_init(struct msm_panel_info *pinfo);
-void mipi_race_cmd_init(struct msm_panel_info *pinfo);
-extern int mipi_dsi_phy_init(struct mipi_dsi_panel_config *);
-extern void mdp_setup_mdt61_video_dsi_config(void);
-extern void config_mdt61_dsi_video_mode(void);
-int target_cont_splash_screen(void);
-
-#endif
