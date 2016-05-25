@@ -460,6 +460,7 @@ scan_qwerty_gpio_keypad(struct timer *timer, time_t now, void *arg)
 		/*Post event if key pressed*/
 		if(key_status)
 		{
+			dprintf(INFO, "key pressed %d\n", keypad->keymap[i]);
 			keys_post_event(keypad->keymap[i], 1);
 		}
 	}
