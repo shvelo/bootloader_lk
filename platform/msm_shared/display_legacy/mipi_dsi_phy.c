@@ -191,20 +191,28 @@ int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
 #else
 int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
 {
-	*(unsigned *)0x04700538 = 0x11;
-	*(unsigned *)0x04700518 = 0x03;
+	uint32_t i, off = 0;
+	struct mipi_dsi_phy_ctrl *pd;
 
-	*(unsigned *)0x047004B0 = 0x25;
-	*(unsigned *)0x04700480 = 0xFF;
-	*(unsigned *)0x04700470 = 0x5F;
-	*(unsigned *)0x0470047C = 0x10;
-	*(unsigned *)0x04700488 = 0x06;
+	pd = (pinfo->dsi_phy_config);
 
-	*(unsigned *)0x04700500 = 0x02;
-	*(unsigned *)0x04700504 = 0x08;
-	*(unsigned *)0x04700508 = 0x05;
-	*(unsigned *)0x0470050C = 0x00;
-	*(unsigned *)0x04700510 = 0x20;
+	writel(0x0001, MIPI_DSI_BASE + 0x128);	/* start phy sw reset */
+	writel(0x0000, MIPI_DSI_BASE + 0x128);	/* end phy w reset */
+
+	*(unsigned *)0x04700538 = 0x11;	//DSI1_DSIPHY_CAL_HW_CFG0
+	*(unsigned *)0x04700518 = 0x03; //DSIPHY_REGULATOR_CAL_PWR_CFG
+
+	*(unsigned *)0x047004B0 = 0x25;	//???
+	*(unsigned *)0x04700480 = 0xFF;	//STRENGTH 0
+	*(unsigned *)0x04700470 = 0x5F;	//CTRL 0
+	*(unsigned *)0x0470047C = 0x10;	//CTRL 3
+	*(unsigned *)0x04700488 = 0x06;	//STRENGTH 2
+
+	*(unsigned *)0x04700500 = 0x02;	//REGULATOR_CTRL 0
+	*(unsigned *)0x04700504 = 0x08;	//REGULATOR_CTRL 1
+	*(unsigned *)0x04700508 = 0x05;	//REGULATOR_CTRL 2
+	*(unsigned *)0x0470050C = 0x00;	//REGULATOR_CTRL 3
+	*(unsigned *)0x04700510 = 0x20;	//REGULATOR_CTRL 4
 	*(unsigned *)0x04700518 = 0x03; //DSI1_DSIPHY_REGULATOR_CAL_PWR_CFG
 	*(unsigned *)0x04700534 = 0x00; //DSI1_DSIPHY_CAL_SW_CFG2
 	*(unsigned *)0x0470053C = 0x5A; //DSI1_DSIPHY_CAL_HW_CFG1
@@ -213,7 +221,7 @@ int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
 	*(unsigned *)0x04700538 = 0x01; //DSI1_DSIPHY_CAL_HW_CFG0
 	*(unsigned *)0x04700528 = 0x00; //DSI1_DSIPHY_CAL_HW_TRIGGER
 
-	while(int i = 0; (*(unsigned *)0x04700550) & 0x10 == 1; i++) {
+	for(i = 0; ((*(unsigned *)0x04700550) & 0x10) == 1; i++) {	//CALIBRATION_READY
 		if (i > 5000) {
 			dprintf(INFO, "DSI Phy calibration timeout.\n");
 			return 1;
@@ -243,11 +251,19 @@ int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
 
 	*(unsigned *)0x04700200 = 0x01;
 
-	for(int i = 0; (*(unsigned *)0x04700280) & 1; i++) { //DSIPHY_PLL_RDY
+	for(i = 0; ((*(unsigned *)0x04700280) & 1); i++) { //DSIPHY_PLL_RDY
 		if (i >= 0x200000) {
 			dprintf(INFO, "DSI Phy initialization timeout.\n");
 			return 1;
 		}
 	}
+
+	off = 0x0440;		/* phy timing ctrl 0 - 11 */
+	for (i = 0; i < 12; i++) {
+		writel(pd->timing[i], MIPI_DSI_BASE + off);
+		off += 4;
+	}
+
+	return 0;
 }
 #endif
