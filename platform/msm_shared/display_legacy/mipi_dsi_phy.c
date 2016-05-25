@@ -33,6 +33,7 @@
 #include <platform/iomap.h>
 #include <platform/timer.h>
 
+#ifndef LUMIA
 static void mipi_dsi_calibration(void)
 {
 	uint32_t i = 0;
@@ -182,3 +183,66 @@ int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
 	}
 	return 0;
 }
+#else
+int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
+{
+	*(unsigned *)0x04700538 = 0x11;
+	*(unsigned *)0x04700518 = 0x03;
+
+	*(unsigned *)0x047004B0 = 0x25;
+	*(unsigned *)0x04700480 = 0xFF;
+	*(unsigned *)0x04700470 = 0x5F;
+	*(unsigned *)0x0470047C = 0x10;
+	*(unsigned *)0x04700488 = 0x06;
+
+	*(unsigned *)0x04700500 = 0x02;
+	*(unsigned *)0x04700504 = 0x08;
+	*(unsigned *)0x04700508 = 0x05;
+	*(unsigned *)0x0470050C = 0x00;
+	*(unsigned *)0x04700510 = 0x20;
+	*(unsigned *)0x04700518 = 0x03; //DSI1_DSIPHY_REGULATOR_CAL_PWR_CFG
+	*(unsigned *)0x04700534 = 0x00; //DSI1_DSIPHY_CAL_SW_CFG2
+	*(unsigned *)0x0470053C = 0x5A; //DSI1_DSIPHY_CAL_HW_CFG1
+	*(unsigned *)0x04700544 = 0x10; //DSI1_DSIPHY_CAL_HW_CFG3
+	*(unsigned *)0x04700548 = 0x01; //DSI1_DSIPHY_CAL_HW_CFG4
+	*(unsigned *)0x04700538 = 0x01; //DSI1_DSIPHY_CAL_HW_CFG0
+	*(unsigned *)0x04700528 = 0x00; //DSI1_DSIPHY_CAL_HW_TRIGGER
+
+	while(int i = 0; (*(unsigned *)0x04700550) & 0x10 == 1; i++) {
+		if (i > 5000) {
+			dprintf(INFO, "DSI Phy calibration timeout.\n");
+			return 1;
+		}
+	}
+
+	*(unsigned *)0x04700204 = 0x25;
+	*(unsigned *)0x04700208 = 0x30;
+	*(unsigned *)0x0470020C = 0xc2;
+
+	*(unsigned *)0x04700220 = 0x41;
+	*(unsigned *)0x04700224 = 0x01;
+	*(unsigned *)0x04700228 = 0x01;
+
+	*(unsigned *)0x04700214 = 0x30;
+	*(unsigned *)0x04700218 = 0x0c;
+
+	*(unsigned *)0x0470021C = 0x62;
+	*(unsigned *)0x04700230 = 0x00;
+	*(unsigned *)0x04700234 = 0x00;
+	*(unsigned *)0x0470022C = 0x00;
+	*(unsigned *)0x04700238 = 0x00;
+	*(unsigned *)0x04700240 = 0x00;
+	*(unsigned *)0x04700244 = 0x20;
+	*(unsigned *)0x04700248 = 0x00;
+	*(unsigned *)0x0470024C = 0x01;
+
+	*(unsigned *)0x04700200 = 0x01;
+
+	for(int i = 0; (*(unsigned *)0x04700280) & 1; i++) { //DSIPHY_PLL_RDY
+		if (i >= 0x200000) {
+			dprintf(INFO, "DSI Phy initialization timeout.\n");
+			return 1;
+		}
+	}
+}
+#endif
