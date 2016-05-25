@@ -385,8 +385,16 @@ void target_display_init(const char *panel_name)
 		hdmi_set_fb_addr(panel.fb.base);
 		break;
 	case LINUX_MACHTYPE_8627_CDP:
+		mipi_race_cmd_init(&(panel.panel_info));
 		panel.clk_func = msm8960_mipi_panel_clock;
 		panel.power_func = lumia52X_panel_power;
+		panel.fb.base = (void*)0x89000000;
+		panel.fb.width =  panel.panel_info.xres;
+		panel.fb.height =  panel.panel_info.yres;
+		panel.fb.stride =  panel.panel_info.xres;
+		panel.fb.bpp =  panel.panel_info.bpp;
+		panel.fb.format = FB_FORMAT_RGB888;
+		panel.mdp_rev = MDP_REV_42;
 		dprintf(INFO, "8627_CDP not yet implemented\n");
 		break;
 	default:
