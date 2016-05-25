@@ -37,6 +37,7 @@
 #include <mdp4.h>
 
 #include "race.h"
+#include <debug.h>
 
 //static const unsigned char
 /*
@@ -90,6 +91,7 @@ int mipi_race_cmd_config(void *pdata)
 	struct lcdc_panel_info *lcdc = NULL;
 	struct msm_panel_info *pinfo = (struct msm_panel_info *)pdata;
 
+	dprintf(INFO, "Configuring Race CMD panel\n");
 	if (pinfo == NULL)
 		return ERR_INVALID_ARGS;
 
@@ -114,6 +116,7 @@ int mipi_race_cmd_config(void *pdata)
 			eof_bllp_pwr,
 			interleav);*/
 
+	dprintf(INFO, "Running command mode configuration\n");
 	ret = mipi_dsi_cmd_mode_config((pinfo->xres),
 			(pinfo->yres),
 			(pinfo->xres),
@@ -127,12 +130,14 @@ int mipi_race_cmd_config(void *pdata)
 int mipi_race_cmd_on()
 {
 	int ret = NO_ERROR;
+	dprintf(INFO, "Turning Race CMD panel on\n");
 	return ret;
 }
 
 int mipi_race_cmd_off()
 {
 	int ret = NO_ERROR;
+	dprintf(INFO, "Turning Race CMD panel off\n");
 	return ret;
 }
 
@@ -162,6 +167,7 @@ void mipi_race_cmd_init(struct msm_panel_info *pinfo)
 	if (!pinfo)
 		return;
 
+	dprintf(INFO, "Setting up panel data for Race CMD panel\n");
 	pinfo->xres = 480;
 	pinfo->yres = 800;
 	pinfo->lcdc.xres_pad = 0;

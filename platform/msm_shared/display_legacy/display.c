@@ -221,12 +221,15 @@ int msm_display_init(struct msm_fb_panel_data *pdata)
 		goto msm_display_init_out;
 
 	/* Turn on panel */
-	if (pdata->power_func)
+	if (pdata->power_func) {
+		dprintf(INFO, "Display init: Powering panel on\n");
 		ret = pdata->power_func(1);
+	}
 
 	if (ret)
 		goto msm_display_init_out;
 
+	dprintf(INFO, "Display init: Allocating framebuffer\n");
 	ret = msm_fb_alloc(&(panel->fb));
 	if (ret)
 		goto msm_display_init_out;
