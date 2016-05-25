@@ -338,6 +338,9 @@ void target_display_init(const char *panel_name)
 
 		hdmi_set_fb_addr(panel.fb.base);
 		break;
+	case LINUX_MACHTYPE_8627_CDP:
+		dprintf(INFO, "8627_CDP not yet implemented");
+		break;
 	default:
 		return;
 	};
