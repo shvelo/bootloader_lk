@@ -41,12 +41,14 @@ static uint8_t ldo_n_voltage_mult[LDO_VOLTAGE_ENTRIES] = {
 	18, /* 1.2V */
 	0,
 	0,
+	0,
 	};
 
 static uint8_t ldo_p_voltage_mult[LDO_VOLTAGE_ENTRIES] = {
 	0,
 	6, /* 1.8V */
 	30, /* 3.0V */
+	26, /* 2.8V */
 	};
 
 /* Intialize the pmic driver */
