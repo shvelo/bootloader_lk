@@ -3161,7 +3161,7 @@ static void cmd_oem_mbn(const char *arg, void *data, unsigned sz)
 		fastboot_fail("ERROR: Cannot read MBN\n");
 	}
 
-	fastboot_info("Loading MBN): done\n");
+	fastboot_info("Loading MBN: done\n");
 
 	kernel_start_addr = (unsigned char *)(image_addr + 40);
 	kernel_size = hdr->code_size;
