@@ -3079,6 +3079,129 @@ void cmd_oem_devinfo(const char *arg, void *data, unsigned sz)
 	fastboot_okay("");
 }
 
+static void cmd_oem_mbn(const char *arg, void *data, unsigned sz)
+{
+
+	typedef struct mbn_img_hdr{
+		unsigned type;
+		unsigned version;
+		unsigned from;
+		unsigned to;
+		unsigned size;
+		unsigned code_size;
+		unsigned code_end;
+		unsigned sign_size;
+		unsigned sign_end;
+		unsigned cert_size;
+	} mbn_img_hdr;
+
+	typedef void entry_func_ptr(unsigned, unsigned, unsigned, unsigned);
+	void (*entry)(unsigned, unsigned, unsigned, unsigned);
+
+	struct mbn_img_hdr *hdr = (void*) buf;
+	unsigned offset = 0;
+	int rcode;
+	unsigned long long ptn = 0;
+	int index = INVALID_PTN;
+
+	unsigned char *image_addr = 0;
+	unsigned kernel_actual;
+	unsigned imagesize_actual;
+
+	unsigned int out_len = 0;
+	unsigned int out_avai_len = 0;
+	unsigned char *out_addr = NULL;
+	unsigned char *kernel_start_addr = NULL;
+	unsigned int kernel_size = 0;
+	int rc;
+
+	index = partition_get_index("BACKUP_UEFI");
+	ptn = partition_get_offset(index);
+	if(ptn == 0) {
+		fastboot_fail("ERROR: Partition not found");
+	}
+
+	/* Set Lun for boot & recovery partitions */
+	mmc_set_lun(partition_get_lun(index));
+
+	if (mmc_read(ptn + offset, (uint32_t *) buf, page_size)) {
+		fastboot_fail("ERROR: Cannot read MBN header");
+	}
+
+	if (!((hdr->type == 5)&&(hdr->version == 3))) {
+		fastboot_fail("ERROR: Invalid MBN header");
+	}
+
+	kernel_actual = ROUND_TO_PAGE(hdr->code_size,  page_mask);
+
+	image_addr = (unsigned char *)target_get_scratch_address();
+
+	imagesize_actual = (page_size + kernel_actual);
+
+	if (check_aboot_addr_range_overlap((uint32_t) image_addr, imagesize_actual))
+	{
+		fastboot_fail("Boot image buffer address overlaps with aboot addresses.\n");
+	}
+
+	/*
+	 * Update loading flow of bootimage to support compressed/uncompressed
+	 * bootimage on both 64bit and 32bit platform.
+	 * 1. Load bootimage from emmc partition onto DDR.
+	 * 2. Check if bootimage is gzip format. If yes, decompress compressed kernel
+	 * 3. Check kernel header and update kernel load addr for 64bit and 32bit
+	 *    platform accordingly.
+	 * 4. Sanity Check on kernel_addr and ramdisk_addr and copy data.
+	 */
+
+	fastboot_info("Loading MBN: start\n");
+
+	/* Read image without signature */
+	if (mmc_read(ptn + offset, (void *)image_addr, imagesize_actual))
+	{
+		fastboot_fail("ERROR: Cannot read MBN\n");
+	}
+
+	fastboot_info("Loading MBN): done\n");
+
+	kernel_start_addr = (unsigned char *)(image_addr + 40);
+	kernel_size = hdr->code_size;
+
+	kernel_size = ROUND_TO_PAGE(kernel_size,  page_mask);
+
+	/* Check if the addresses in the header are valid. */
+	if (check_aboot_addr_range_overlap(hdr->to, kernel_size))
+	{
+		fastboot_fail("kernel/ramdisk addresses overlap with aboot addresses.\n");
+	}
+
+	memmove((void*) hdr->to, kernel_start_addr, kernel_size);
+
+	fastboot_okay("");
+
+	/* Perform target specific cleanup */
+	target_uninit();
+
+	/* Turn off splash screen if enabled */
+#if DISPLAY_SPLASH_SCREEN
+	target_display_shutdown();
+#endif
+
+	enter_critical_section();
+
+	/* do any platform specific cleanup before kernel entry */
+	platform_uninit();
+
+	arch_disable_cache(UCACHE);
+
+#if ARM_WITH_MMU
+	arch_disable_mmu();
+#endif
+
+	entry = (entry_func_ptr*)(PA((addr_t)hdr->to));
+	entry(0, hdr->to, 0xff, 0xff);
+
+}
+
 void cmd_flashing_get_unlock_ability(const char *arg, void *data, unsigned sz)
 {
 	char response[MAX_RSP_SIZE];
@@ -3704,6 +3827,7 @@ void aboot_fastboot_register_commands(void)
 						{"oem enable-charger-screen", cmd_oem_enable_charger_screen},
 						{"oem disable-charger-screen", cmd_oem_disable_charger_screen},
 						{"oem select-display-panel", cmd_oem_select_display_panel},
+						{"oem mbn", cmd_oem_mbn},
 #if WITH_DEBUG_LOG_BUF
 						{"oem lk_log", cmd_oem_lk_log},
 #endif
