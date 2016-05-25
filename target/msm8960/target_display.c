@@ -260,6 +260,52 @@ static int msm8960_liquid_mipi_panel_power(int enable)
 	return 0;
 }
 
+/* Lumia 52X start */
+
+static void lumia52X_backlight_on(void)
+{
+	//Should be done by DSI command
+}
+
+static void lumia52X_panel_reset(void) {
+	dprintf(INFO, "Lumia 52X: panel reset\n");
+	gpio_tlmm_config(58, 0, GPIO_OUTPUT, GPIO_PULL_UP, GPIO_2MA, 1);
+	mdelay(20);
+	gpio_tlmm_config(58, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_2MA, 1);
+	mdelay(20);
+	gpio_tlmm_config(58, 0, GPIO_OUTPUT, GPIO_PULL_UP, GPIO_2MA, 1);
+	mdelay(20);
+	dprintf(INFO, "Lumia 52X: panel reset done\n");
+}
+
+static int lumia52X_panel_power(int enable)
+{
+	if (enable) {
+		dprintf(INFO, "Lumia 52X: powering panel on\n");
+		lumia520_backlight_on();
+
+		/* Turn on LDO8 for lcd1 mipi vdd */
+		pm8921_ldo_set_voltage(LDO_8, LDO_VOLTAGE_2_8V);
+
+		/* Turn on LDO11 for lcd1 mipi vddio */
+		pm8921_ldo_set_voltage(LDO_11, LDO_VOLTAGE_1_8V);
+
+		/* Turn on LDO23 for lcd1 mipi vddio */
+		pm8921_ldo_set_voltage(LDO_23, LDO_VOLTAGE_1_8V);
+
+		/* Turn on LDO2 for vdda_mipi_dsi */
+		pm8921_ldo_set_voltage(LDO_2, LDO_VOLTAGE_1_2V);
+
+		lumia520_panel_reset();
+
+		dprintf(INFO, "Lumia 52X: panel is on\n");
+	}
+
+	return 0;
+}
+
+/* Lumia 52X end */
+
 void target_display_init(const char *panel_name)
 {
 	int target_id = board_target_id();
@@ -339,6 +385,8 @@ void target_display_init(const char *panel_name)
 		hdmi_set_fb_addr(panel.fb.base);
 		break;
 	case LINUX_MACHTYPE_8627_CDP:
+		panel.clk_func = msm8960_mipi_panel_clock;
+		panel.power_func = lumia52X_panel_power;
 		dprintf(INFO, "8627_CDP not yet implemented");
 		break;
 	default:
