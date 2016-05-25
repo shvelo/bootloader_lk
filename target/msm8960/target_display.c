@@ -282,7 +282,7 @@ static int lumia52X_panel_power(int enable)
 {
 	if (enable) {
 		dprintf(INFO, "Lumia 52X: powering panel on\n");
-		lumia520_backlight_on();
+		lumia52X_backlight_on();
 
 		/* Turn on LDO8 for lcd1 mipi vdd */
 		pm8921_ldo_set_voltage(LDO_8, LDO_VOLTAGE_2_8V);
@@ -296,7 +296,7 @@ static int lumia52X_panel_power(int enable)
 		/* Turn on LDO2 for vdda_mipi_dsi */
 		pm8921_ldo_set_voltage(LDO_2, LDO_VOLTAGE_1_2V);
 
-		lumia520_panel_reset();
+		lumia52X_panel_reset();
 
 		dprintf(INFO, "Lumia 52X: panel is on\n");
 	}
