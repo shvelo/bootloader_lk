@@ -37,6 +37,7 @@
 #include <platform/clock.h>
 #include <platform/gpio.h>
 #include <platform/timer.h>
+#include <clock.h>
 
 static struct msm_fb_panel_data panel;
 static uint8_t display_enable;
@@ -304,6 +305,18 @@ static int lumia52X_panel_power(int enable)
 	return 0;
 }
 
+static int lumia52X_panel_clock(int enable) {
+
+	dprintf(INFO, "Lumia 52X: turning on MDP clock\n");
+	clk_get_set_enable("mdp_clk", 200000000, 1);
+	clk_get_set_enable("lut_mdp", 0, 1);
+
+	mmss_clock_init();
+
+	return 0;
+
+}
+
 /* Lumia 52X end */
 
 void target_display_init(const char *panel_name)
@@ -386,7 +399,7 @@ void target_display_init(const char *panel_name)
 		break;
 	case LINUX_MACHTYPE_8627_CDP:
 		mipi_race_cmd_init(&(panel.panel_info));
-		panel.clk_func = msm8960_mipi_panel_clock;
+		panel.clk_func = lumia52X_panel_clock;
 		panel.power_func = lumia52X_panel_power;
 		panel.fb.base = (void*)0x89000000;
 		panel.fb.width =  panel.panel_info.xres;
