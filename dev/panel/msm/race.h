@@ -27,6 +27,6 @@
  *
  */
 
-int mipi_race_cmd_on();
-int mipi_race_cmd_off();
+int mipi_race_cmd_on(void);
+int mipi_race_cmd_off(void);
 
