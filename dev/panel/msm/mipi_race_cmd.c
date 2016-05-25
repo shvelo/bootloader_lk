@@ -37,6 +37,7 @@
 #include <mdp4.h>
 
 
+
 //static const unsigned char
 /*
 	<DSIInitSequence>
@@ -51,7 +52,7 @@
 	</DSIInitSequence>
 */
 
-static const unsigned char race_cmd_cmds[7][4] = {
+static const unsigned char race_cmd_cmds[8][4] = {
 	{0x11, 0x00, 0x05, 0x80},	/* DTYPE_DCS_WRITE */	//exit sleep
 	{0x78, 0x00, 0xff, 0x80},	//???
 	{0x3A, 0x70, 0x15, 0x80},	/* DTYPE_DCS_WRITE1 */	//set pixel format
