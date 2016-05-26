@@ -233,6 +233,7 @@ int mdp_dma_on(struct msm_panel_info *pinfo)
 {
 	int ret = 0;
 
+	dprintf(INFO, "MDP4: Enabling DMA\n");
 	writel(0x00000001, MDP_DMA_P_START);
 
 	return ret;

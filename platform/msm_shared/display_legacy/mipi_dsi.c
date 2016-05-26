@@ -282,6 +282,8 @@ int mipi_dsi_panel_initialize(struct mipi_dsi_panel_config *pinfo)
 	int status = 0;
 	unsigned char DLNx_EN;
 
+	dprintf(INFO, "DSI panel initialize: Panel uses %d lanes\n", pinfo->num_of_lanes);
+
 	switch (pinfo->num_of_lanes) {
 	default:
 	case 1:
@@ -298,8 +300,8 @@ int mipi_dsi_panel_initialize(struct mipi_dsi_panel_config *pinfo)
 		break;
 	}
 
-	writel(0x0001, DSI_SOFT_RESET);
-	writel(0x0000, DSI_SOFT_RESET);
+	//writel(0x0001, DSI_SOFT_RESET);
+	//writel(0x0000, DSI_SOFT_RESET);
 
 	writel((0 << 16) | 0x3f, DSI_CLK_CTRL);	/* Turn on all DSI Clks */
 	writel(DMA_STREAM1 << 8 | 0x04, DSI_TRIG_CTRL);	// reg 0x80 dma trigger: sw
@@ -311,9 +313,11 @@ int mipi_dsi_panel_initialize(struct mipi_dsi_panel_config *pinfo)
 	       | PACK_TYPE1 << 24 | VC1 << 22 | DT1 << 16 | WC1,
 	       DSI_COMMAND_MODE_DMA_CTRL);
 
-	if (pinfo->panel_cmds)
+	if (pinfo->panel_cmds) {
+		dprintf(INFO, "DSI panel initialize: Trying to send %d commands\n", pinfo->num_of_panel_cmds);
 		status = mipi_dsi_cmds_tx(pinfo->panel_cmds,
 					  pinfo->num_of_panel_cmds);
+	}
 
 	return status;
 }
@@ -441,13 +445,13 @@ config_dsi_cmd_mode(unsigned short disp_width, unsigned short disp_height,
 	// writel(0, DSI_ERR_INT_MASK0);
 
 	DST_FORMAT = 8;		// RGB888
-	dprintf(SPEW, "DSI_Cmd_Mode - Dst Format: RGB888\n");
+	dprintf(INFO, "DSI_Cmd_Mode - Dst Format: RGB888\n");
 
 	DLNx_EN = 3;		// 2 lane with clk programming
-	dprintf(SPEW, "Data Lane: 2 lane\n");
+	dprintf(INFO, "Data Lane: 2 lane\n");
 
 	TRAFIC_MODE = 0;	// non burst mode with sync pulses
-	dprintf(SPEW, "Traffic mode: non burst mode with sync pulses\n");
+	dprintf(INFO, "Traffic mode: non burst mode with sync pulses\n");
 
 	writel(0x02020202, DSI_INT_CTRL);
 

@@ -196,6 +196,7 @@ int mipi_dsi_phy_init(struct mipi_dsi_panel_config *pinfo)
 
 	pd = (pinfo->dsi_phy_config);
 
+	dprintf(INFO, "PHY: Triggering PHY SW reset\n");
 	writel(0x0001, MIPI_DSI_BASE + 0x128);	/* start phy sw reset */
 	writel(0x0000, MIPI_DSI_BASE + 0x128);	/* end phy w reset */
 

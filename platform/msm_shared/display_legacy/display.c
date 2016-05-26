@@ -240,6 +240,7 @@ int msm_display_init(struct msm_fb_panel_data *pdata)
 	if (ret)
 		goto msm_display_init_out;
 
+	dprintf(INFO, "Display init: Enabling screen\n");
 	ret = msm_display_on();
 	if (ret)
 		goto msm_display_init_out;
